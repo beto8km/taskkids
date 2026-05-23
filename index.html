@@ -1,0 +1,559 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<meta name="theme-color" content="#1F1F1F">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="TaskKids">
+<link rel="manifest" href="manifest.json">
+<link rel="apple-touch-icon" href="icon-192.png">
+<title>TaskKids</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+:root{--bg:#f8f7f4;--card:#fff;--border:#e5e3dd;--text:#1a1a1a;--muted:#777;--accent:#FFC300;--dark:#1F1F1F;--danger:#e24b4a;--r:14px;--font:'Segoe UI',system-ui,-apple-system,sans-serif}
+html,body{height:100%;overflow:hidden;background:var(--bg)}
+body{font-family:var(--font);color:var(--text);font-size:15px;display:flex;flex-direction:column}
+#app{display:flex;flex-direction:column;height:100%;max-width:480px;margin:0 auto;width:100%}
+.topbar{display:flex;align-items:center;gap:8px;padding:max(env(safe-area-inset-top),12px) 14px 12px;background:var(--dark);color:#fff;flex-shrink:0}
+.logo{font-size:20px;font-weight:800;letter-spacing:-.5px;flex:1}
+.logo span{color:var(--accent)}
+.tbtn{background:none;border:none;color:#fff;font-size:22px;cursor:pointer;padding:0;border-radius:8px;min-width:40px;min-height:40px;display:flex;align-items:center;justify-content:center}
+.tbtn:active{background:rgba(255,255,255,.18)}
+.scroll{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;padding-bottom:max(env(safe-area-inset-bottom),16px)}
+.pg{display:none;padding:16px}
+.pg.on{display:block}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;padding:12px 18px;border-radius:10px;border:none;cursor:pointer;font-size:14px;font-weight:700;min-height:46px;-webkit-appearance:none;transition:transform .1s;font-family:var(--font)}
+.btn:active{transform:scale(.96)}
+.bp{background:var(--dark);color:#fff}
+.ba{background:var(--accent);color:var(--dark)}
+.bo{background:#fff;color:var(--text);border:1px solid var(--border)}
+.bd{background:var(--danger);color:#fff}
+.bsm{padding:8px 14px;font-size:13px;min-height:36px}
+.bw{width:100%}
+input,select,textarea{width:100%;padding:12px 14px;border:1.5px solid var(--border);border-radius:10px;font-size:15px;font-family:var(--font);background:#fff;color:var(--text);margin-bottom:12px;outline:none;-webkit-appearance:none;display:block}
+input:focus,select:focus,textarea:focus{border-color:#555}
+label{font-size:13px;color:var(--muted);margin-bottom:5px;display:block;font-weight:600}
+.pgrid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:10px}
+.pcard{background:var(--card);border:2.5px solid var(--border);border-radius:var(--r);padding:22px 12px;text-align:center;cursor:pointer;transition:border-color .15s,transform .1s}
+.pcard:active{transform:scale(.96)}
+.pcard:hover{border-color:var(--accent)}
+.av{width:62px;height:62px;border-radius:50%;margin:0 auto 10px;display:flex;align-items:center;justify-content:center;font-size:26px;font-weight:900}
+.ap{background:var(--dark);color:var(--accent)}
+.af{background:var(--accent);color:var(--dark)}
+.pn{font-weight:800;font-size:16px}
+.pr{font-size:12px;color:var(--muted);margin-top:2px}
+.tcard{background:var(--card);border:.5px solid var(--border);border-radius:var(--r);padding:14px;margin-bottom:10px}
+.tcard.done{opacity:.5}
+.tcard.late{border-left:3px solid var(--danger);padding-left:11px}
+.th{display:flex;align-items:flex-start;gap:12px}
+.timg{width:66px;height:66px;border-radius:10px;object-fit:cover;flex-shrink:0;border:.5px solid var(--border)}
+.tiph{width:66px;height:66px;border-radius:10px;background:#f0ede6;display:flex;align-items:center;justify-content:center;font-size:28px;flex-shrink:0}
+.ti{flex:1;min-width:0}
+.tt{font-weight:800;font-size:15px;margin-bottom:3px}
+.td{font-size:13px;color:var(--muted);margin-bottom:6px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.tags{display:flex;flex-wrap:wrap;gap:4px;margin-bottom:6px}
+.tag{display:inline-block;padding:3px 9px;border-radius:20px;font-size:11px;font-weight:800}
+.tpend{background:#faeeda;color:#633806}
+.tfeito{background:#eaf3de;color:#27500a}
+.tlate{background:#fcebeb;color:#501313}
+.tobrig{background:#e6f1fb;color:#0c447c}
+.tfilha{background:var(--dark);color:var(--accent)}
+.ttime{font-size:12px;color:var(--muted);display:flex;align-items:center;gap:5px;margin-top:2px}
+.dot{width:6px;height:6px;border-radius:50%;background:#ccc;flex-shrink:0}
+.doth{background:var(--accent)}
+.tact{display:flex;gap:8px;margin-top:12px;flex-wrap:wrap}
+.fbar{display:flex;gap:8px;overflow-x:auto;padding-bottom:6px;margin-bottom:14px}
+.fbar::-webkit-scrollbar{display:none}
+.fchip{padding:8px 16px;border-radius:20px;border:1.5px solid var(--border);font-size:13px;font-weight:700;cursor:pointer;white-space:nowrap;background:#fff;min-height:36px;display:flex;align-items:center}
+.fchip.on{background:var(--dark);color:#fff;border-color:var(--dark)}
+.tabs{display:flex;gap:4px;margin-bottom:18px;background:#ece9e0;border-radius:12px;padding:4px}
+.tab{flex:1;text-align:center;padding:10px 4px;border-radius:9px;font-size:14px;font-weight:700;cursor:pointer;color:var(--muted);border:none;background:none;font-family:var(--font)}
+.tab.on{background:#fff;color:var(--text);box-shadow:0 1px 4px rgba(0,0,0,.1)}
+.pwrap{margin-bottom:18px}
+.ph{display:flex;align-items:center;gap:12px;margin-bottom:10px}
+.pbar{height:8px;background:#e8e5dc;border-radius:4px;overflow:hidden}
+.pfill{height:100%;background:var(--accent);border-radius:4px;transition:width .4s}
+.empty{text-align:center;padding:48px 20px;color:var(--muted)}
+.eico{font-size:52px;margin-bottom:14px}
+.rchips{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:14px}
+.rchip{padding:7px 13px;border-radius:20px;font-size:13px;font-weight:700;border:1.5px solid var(--border);cursor:pointer;background:#fff;min-height:36px;font-family:var(--font)}
+.rchip.on{background:var(--dark);color:#fff;border-color:var(--dark)}
+.hitem{display:flex;align-items:center;gap:12px;padding:12px 0;border-bottom:.5px solid var(--border)}
+.hitem:last-child{border-bottom:none}
+.hico{width:32px;height:32px;border-radius:50%;background:#eaf3de;display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0}
+.trow{display:flex;align-items:center;justify-content:space-between;padding:12px 0;border-bottom:.5px solid var(--border)}
+.tog{position:relative;width:50px;height:28px;flex-shrink:0}
+.tog input{opacity:0;width:0;height:0;position:absolute}
+.tsl{position:absolute;inset:0;background:#ccc;border-radius:28px;cursor:pointer;transition:.2s}
+.tsl:before{content:'';position:absolute;width:22px;height:22px;left:3px;top:3px;background:#fff;border-radius:50%;transition:.2s}
+input:checked+.tsl{background:var(--dark)}
+input:checked+.tsl:before{transform:translateX(22px)}
+.mover{display:none;position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:200;align-items:flex-end;justify-content:center}
+.mover.on{display:flex}
+.modal{background:#fff;border-radius:22px 22px 0 0;padding:20px 20px max(calc(env(safe-area-inset-bottom) + 20px),24px);width:100%;max-width:480px;max-height:92vh;overflow-y:auto}
+.mtit{font-size:18px;font-weight:900;margin-bottom:18px;display:flex;justify-content:space-between;align-items:center}
+.mclose{background:none;border:none;font-size:28px;cursor:pointer;color:var(--muted);padding:0;line-height:1;min-width:44px;min-height:44px;display:flex;align-items:center;justify-content:center}
+.upbox{border:2px dashed var(--border);border-radius:12px;padding:28px 16px;text-align:center;cursor:pointer;margin-bottom:12px;background:#fafafa;display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:80px}
+.upbox:active{background:#f0ede6}
+.upbox img{width:100%;max-height:160px;object-fit:contain;border-radius:10px}
+.nbar{background:var(--accent);color:var(--dark);padding:12px 16px;font-size:14px;font-weight:800;display:none;text-align:center;cursor:pointer;flex-shrink:0}
+.nbar.on{display:block}
+.loading{display:flex;align-items:center;justify-content:center;height:60vh;flex-direction:column;gap:16px}
+.spin{width:40px;height:40px;border:3px solid var(--border);border-top-color:var(--dark);border-radius:50%;animation:sp .8s linear infinite}
+@keyframes sp{to{transform:rotate(360deg)}}
+.pdots{display:flex;justify-content:center;gap:12px;margin:20px 0}
+.pdot{width:16px;height:16px;border-radius:50%;border:2px solid var(--border);background:#fff;transition:background .15s}
+.pdot.fill{background:var(--dark);border-color:var(--dark)}
+.ppad{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;max-width:260px;margin:0 auto}
+.pk{background:#fff;border:1.5px solid var(--border);border-radius:12px;padding:16px;font-size:22px;font-weight:700;cursor:pointer;text-align:center;font-family:var(--font)}
+.pk:active{background:var(--accent);border-color:var(--accent)}
+.sectit{font-size:12px;font-weight:800;color:var(--muted);text-transform:uppercase;letter-spacing:.6px;margin:16px 0 10px}
+.infocfg{margin-top:20px;padding:14px;background:#f0ede6;border-radius:12px}
+.infocfg p{font-size:13px;font-weight:800;margin-bottom:8px}
+.infocfg ol{font-size:13px;color:var(--muted);line-height:2.1;padding-left:18px}
+</style>
+</head>
+<body>
+<div id="app">
+  <div id="nbar" class="nbar" onclick="closeNotif()">🔔 <span id="ntxt"></span></div>
+  <div class="topbar">
+    <div class="logo">Task<span>Kids</span></div>
+    <div style="display:flex;gap:4px">
+      <button class="tbtn" id="btnHome" style="display:none" onclick="goHome()">⌂</button>
+      <button class="tbtn" id="btnAdd" style="display:none" onclick="openAddTask()">＋</button>
+      <button class="tbtn" id="btnCfg" onclick="openConfig()">⚙</button>
+    </div>
+  </div>
+  <div class="scroll" id="scroll">
+
+    <div id="pg-loading" class="pg on">
+      <div class="loading"><div class="spin"></div><p style="color:var(--muted);font-size:14px">Conectando...</p></div>
+    </div>
+
+    <div id="pg-setup" class="pg">
+      <p style="font-size:22px;font-weight:900;margin-bottom:6px;margin-top:8px">🔧 Configurar Firebase</p>
+      <p style="font-size:14px;color:var(--muted);margin-bottom:20px;line-height:1.6">Cole aqui os dados do seu projeto Firebase. Faça isso só uma vez — todos os celulares vão compartilhar os mesmos dados.</p>
+      <label>API Key</label>
+      <input type="text" id="fb-key" placeholder="AIzaSy...">
+      <label>Project ID</label>
+      <input type="text" id="fb-pid" placeholder="taskkids-abc123">
+      <label>App ID</label>
+      <input type="text" id="fb-aid" placeholder="1:123456789:web:abc123">
+      <button class="btn bp bw" onclick="saveFbCfg()" style="margin-top:4px">✅ Conectar ao Firebase</button>
+      <div id="fb-err" style="color:var(--danger);font-size:13px;margin-top:10px;display:none"></div>
+      <div class="infocfg">
+        <p>Como pegar esses dados (5 minutos):</p>
+        <ol>
+          <li>Acesse <strong>console.firebase.google.com</strong> com sua conta Google</li>
+          <li>Clique em <strong>"Criar um projeto"</strong> → nome: <em>taskkids</em></li>
+          <li>Dentro do projeto, clique em <strong>"Adicionar app" → ícone &lt;/&gt; (Web)</strong></li>
+          <li>Dê um nome qualquer e clique em <strong>"Registrar app"</strong></li>
+          <li>Copie os valores de <strong>apiKey</strong>, <strong>projectId</strong> e <strong>appId</strong></li>
+          <li>No menu lateral: <strong>Criação → Firestore Database → Criar banco de dados → Modo de teste → Avançar</strong></li>
+        </ol>
+      </div>
+    </div>
+
+    <div id="pg-home" class="pg">
+      <p style="font-size:17px;font-weight:800;margin-bottom:4px;margin-top:8px">Quem é você?</p>
+      <p style="font-size:13px;color:var(--muted);margin-bottom:4px">Selecione seu perfil</p>
+      <div class="pgrid" id="pgrid"></div>
+      <div id="no-prof" style="display:none"><div class="empty"><div class="eico">👨‍👧</div><p>Nenhum perfil ainda.<br>Toque em ⚙ para configurar.</p></div></div>
+    </div>
+
+    <div id="pg-pin" class="pg" style="text-align:center">
+      <p style="font-size:18px;font-weight:900;margin:16px 0 6px">🔐 PIN do Responsável</p>
+      <p style="font-size:13px;color:var(--muted);margin-bottom:4px">Digite seu PIN de 4 dígitos</p>
+      <div class="pdots">
+        <div class="pdot" id="d0"></div><div class="pdot" id="d1"></div>
+        <div class="pdot" id="d2"></div><div class="pdot" id="d3"></div>
+      </div>
+      <p id="pin-err" style="color:var(--danger);font-size:13px;min-height:18px;margin-bottom:10px"></p>
+      <div class="ppad">
+        <button class="pk" onclick="pk('1')">1</button><button class="pk" onclick="pk('2')">2</button><button class="pk" onclick="pk('3')">3</button>
+        <button class="pk" onclick="pk('4')">4</button><button class="pk" onclick="pk('5')">5</button><button class="pk" onclick="pk('6')">6</button>
+        <button class="pk" onclick="pk('7')">7</button><button class="pk" onclick="pk('8')">8</button><button class="pk" onclick="pk('9')">9</button>
+        <button class="pk" onclick="pk('C')" style="font-size:16px">⌫</button>
+        <button class="pk" onclick="pk('0')">0</button>
+        <button class="pk" onclick="goHome()" style="font-size:14px;color:var(--muted)">Voltar</button>
+      </div>
+    </div>
+
+    <div id="pg-pai" class="pg">
+      <div class="tabs" style="margin-top:8px">
+        <button class="tab on" id="tab-t" onclick="paiTab('t')">📋 Tarefas</button>
+        <button class="tab" id="tab-h" onclick="paiTab('h')">📚 Histórico</button>
+      </div>
+      <div id="pai-t"><div class="fbar" id="fbar"></div><div id="pai-list"></div></div>
+      <div id="pai-h" style="display:none"><div id="hist-list"></div></div>
+    </div>
+
+    <div id="pg-filha" class="pg">
+      <div id="fprog" class="pwrap"></div>
+      <div id="filha-list"></div>
+    </div>
+
+  </div>
+</div>
+
+<!-- MODAL CONFIG -->
+<div class="mover" id="m-cfg">
+  <div class="modal">
+    <div class="mtit">Configurações <button class="mclose" onclick="closeM('m-cfg')">×</button></div>
+    <label>Seu nome (Responsável)</label>
+    <input type="text" id="cfg-pai" placeholder="Ex: Papai Roberto">
+    <label>PIN de acesso (4 dígitos)</label>
+    <input type="password" id="cfg-pin" placeholder="1234" maxlength="4" inputmode="numeric">
+    <div class="sectit">Filhas / Filhos</div>
+    <div id="cfg-filhas"></div>
+    <div style="display:flex;gap:8px;margin-bottom:14px;align-items:center">
+      <input type="text" id="new-filha" placeholder="Nome da filha" style="margin:0;flex:1">
+      <button class="btn ba bsm" onclick="addFilha()">+ Add</button>
+    </div>
+    <button class="btn bp bw" onclick="saveConfig()">💾 Salvar</button>
+  </div>
+</div>
+
+<!-- MODAL TAREFA -->
+<div class="mover" id="m-task">
+  <div class="modal">
+    <div class="mtit">Nova Tarefa <button class="mclose" onclick="closeM('m-task')">×</button></div>
+    <label>Para quem?</label>
+    <select id="tk-filha"></select>
+    <label>Título *</label>
+    <input type="text" id="tk-titulo" placeholder="Ex: Arrumar a cama">
+    <label>Descrição (opcional)</label>
+    <textarea id="tk-desc" rows="2" placeholder="Detalhes..."></textarea>
+    <label>Foto da tarefa</label>
+    <div class="upbox" onclick="document.getElementById('tk-inp').click()">
+      <div id="up-ph"><span style="font-size:32px">📷</span><br><span style="font-size:13px;color:var(--muted)">Adicionar foto</span></div>
+      <img id="up-prev" style="display:none">
+    </div>
+    <input type="file" id="tk-inp" accept="image/*" style="display:none" onchange="handleFoto(this)">
+    <label>Horário do alarme</label>
+    <input type="time" id="tk-hora">
+    <label>Repetir nos dias</label>
+    <div class="rchips">
+      <div class="rchip" data-d="0" onclick="this.classList.toggle('on')">Dom</div>
+      <div class="rchip" data-d="1" onclick="this.classList.toggle('on')">Seg</div>
+      <div class="rchip" data-d="2" onclick="this.classList.toggle('on')">Ter</div>
+      <div class="rchip" data-d="3" onclick="this.classList.toggle('on')">Qua</div>
+      <div class="rchip" data-d="4" onclick="this.classList.toggle('on')">Qui</div>
+      <div class="rchip" data-d="5" onclick="this.classList.toggle('on')">Sex</div>
+      <div class="rchip" data-d="6" onclick="this.classList.toggle('on')">Sáb</div>
+    </div>
+    <div class="trow">
+      <div>
+        <div style="font-size:14px;font-weight:700">Foto obrigatória para concluir</div>
+        <div style="font-size:12px;color:var(--muted);margin-top:2px">Filha tira foto como prova</div>
+      </div>
+      <label class="tog"><input type="checkbox" id="tk-obrig"><span class="tsl"></span></label>
+    </div>
+    <div style="height:16px"></div>
+    <button class="btn bp bw" onclick="saveTask()">✅ Salvar Tarefa</button>
+    <button class="btn bo bw" style="margin-top:8px" onclick="closeM('m-task')">Cancelar</button>
+  </div>
+</div>
+
+<!-- MODAL VER TAREFA -->
+<div class="mover" id="m-ver">
+  <div class="modal">
+    <div class="mtit"><span id="vt-tit" style="font-size:16px;max-width:85%"></span><button class="mclose" onclick="closeM('m-ver')">×</button></div>
+    <img id="vt-foto" style="display:none;width:100%;max-height:220px;object-fit:contain;border-radius:12px;margin-bottom:14px;border:.5px solid var(--border)">
+    <p id="vt-desc" style="font-size:14px;color:var(--muted);margin-bottom:8px;line-height:1.5"></p>
+    <p id="vt-hora" style="font-size:13px;color:var(--muted);margin-bottom:16px"></p>
+    <div id="vt-act"></div>
+    <div id="vt-cfm" style="display:none">
+      <p style="font-size:14px;font-weight:700;margin-bottom:10px">📸 Tire uma foto como prova:</p>
+      <div class="upbox" onclick="document.getElementById('cfm-inp').click()">
+        <div id="cfm-ph"><span style="font-size:32px">📷</span><br><span style="font-size:13px;color:var(--muted)">Câmera / Galeria</span></div>
+        <img id="cfm-prev" style="display:none;width:100%;max-height:160px;object-fit:contain;border-radius:10px">
+      </div>
+      <input type="file" id="cfm-inp" accept="image/*" capture="environment" style="display:none" onchange="handleCfm(this)">
+      <button class="btn ba bw" id="btn-cfm" onclick="concludePhoto()" disabled style="opacity:.5;margin-top:4px">✅ Concluir com foto</button>
+    </div>
+  </div>
+</div>
+
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+<script>
+const LS_FB='tk_fb3';
+let db=null,cfg={nomePai:'',pin:'1234',filhas:[]},tasks=[],history=[];
+let curUser=null,curTask=null,taskFoto=null,cfmFoto=null,fFilter='all',pinStr='';
+let alarms=[],unsCfg=null,unsTask=null,unsHist=null;
+
+function saveFbCfg(){
+  const fc={k:id('fb-key').value.trim(),p:id('fb-pid').value.trim(),a:id('fb-aid').value.trim()};
+  if(!fc.k||!fc.p||!fc.a){alert('Preencha todos os campos');return}
+  localStorage.setItem(LS_FB,JSON.stringify(fc));
+  initFb(fc);
+}
+
+function initFb(fc){
+  try{firebase.apps.length&&firebase.app().delete()}catch(e){}
+  firebase.initializeApp({apiKey:fc.k,authDomain:fc.p+'.firebaseapp.com',projectId:fc.p,appId:fc.a});
+  db=firebase.firestore();
+  subAll();
+}
+
+function subAll(){
+  show('pg-loading');
+  unsCfg&&unsCfg();
+  unsCfg=db.collection('app').doc('config').onSnapshot(snap=>{
+    if(snap.exists)cfg=snap.data();
+    unsTask&&unsTask();
+    unsTask=db.collection('tasks').orderBy('criadoEm','desc').onSnapshot(snap=>{
+      tasks=snap.docs.map(d=>({id:d.id,...d.data()}));
+      schedAlarms();
+      if(curUser==='pai')renderPai();
+      else if(curUser)renderFilha(curUser);
+      if(el('pg-loading').classList.contains('on'))renderHome();
+    },err=>{show('pg-setup');showFbErr(err.message)});
+    unsHist&&unsHist();
+    unsHist=db.collection('history').orderBy('ts','desc').limit(60).onSnapshot(snap=>{
+      history=snap.docs.map(d=>({id:d.id,...d.data()}));
+      if(curUser==='pai'&&el('pai-h').style.display!=='none')renderHist();
+    });
+  },err=>{show('pg-setup');showFbErr(err.message)});
+}
+
+function showFbErr(msg){const e=el('fb-err');e.style.display='';e.textContent='Erro: '+msg}
+
+function show(pgId){
+  document.querySelectorAll('.pg').forEach(p=>{p.classList.remove('on');p.style.display=''});
+  const e=el(pgId);if(e){e.classList.add('on');e.style.display=''}
+  el('scroll').scrollTop=0;
+}
+
+function goHome(){
+  curUser=null;
+  el('btnHome').style.display='none';el('btnAdd').style.display='none';
+  show('pg-home');renderHome();
+}
+
+function renderHome(){
+  show('pg-home');
+  el('btnHome').style.display='none';el('btnAdd').style.display='none';
+  const grid=el('pgrid'),noP=el('no-prof');grid.innerHTML='';
+  const all=[{id:'pai',nome:cfg.nomePai||'Responsável',role:'Pai / Mãe',cls:'ap'},...(cfg.filhas||[]).map(f=>({id:f.id,nome:f.nome,role:'Filha',cls:'af'}))].filter(p=>p.nome);
+  if(!cfg.nomePai&&!(cfg.filhas||[]).length){noP.style.display='';return}
+  noP.style.display='none';
+  all.forEach(p=>{
+    const d=document.createElement('div');d.className='pcard';
+    d.innerHTML=`<div class="av ${p.cls}">${p.nome[0].toUpperCase()}</div><div class="pn">${esc(p.nome)}</div><div class="pr">${p.role}</div>`;
+    d.onclick=()=>p.id==='pai'?enterPin():enterFilha(p.id);
+    grid.appendChild(d);
+  });
+}
+
+function enterPin(){show('pg-pin');pinStr='';updPin();el('pin-err').textContent=''}
+function pk(k){
+  if(k==='C'){pinStr=pinStr.slice(0,-1);updPin();return}
+  if(pinStr.length>=4)return;
+  pinStr+=k;updPin();
+  if(pinStr.length===4)checkPin();
+}
+function updPin(){for(let i=0;i<4;i++)el('d'+i).className='pdot'+(i<pinStr.length?' fill':'')}
+function checkPin(){
+  if(pinStr===(cfg.pin||'1234')){
+    curUser='pai';el('btnHome').style.display='';el('btnAdd').style.display='';
+    show('pg-pai');renderPai();
+  } else {
+    el('pin-err').textContent='PIN incorreto.';
+    setTimeout(()=>{pinStr='';updPin();el('pin-err').textContent=''},1000);
+  }
+}
+
+function enterFilha(id){
+  curUser=id;el('btnHome').style.display='';el('btnAdd').style.display='none';
+  show('pg-filha');renderFilha(id);
+}
+
+function renderPai(){
+  const bar=el('fbar');bar.innerHTML='';
+  [{id:'all',nome:'Todas'},...(cfg.filhas||[])].forEach(f=>{
+    const c=document.createElement('div');c.className='fchip'+(fFilter===f.id?' on':'');
+    c.textContent=f.nome;c.onclick=()=>{fFilter=f.id;renderPai()};bar.appendChild(c);
+  });
+  let ts=tasks.filter(t=>t.active!==false);
+  if(fFilter!=='all')ts=ts.filter(t=>t.filhaId===fFilter);
+  const list=el('pai-list');
+  if(!ts.length){list.innerHTML='<div class="empty"><div class="eico">📋</div><p>Nenhuma tarefa.<br>Toque em + para adicionar.</p></div>';return}
+  list.innerHTML=ts.map(t=>{
+    const f=getFilha(t.filhaId),done=isDone(t),late=isLate(t)&&!done;
+    return`<div class="tcard${done?' done':''}${late?' late':''}">
+      <div class="th">${t.foto?`<img src="${t.foto}" class="timg">`:'<div class="tiph">📌</div>'}
+        <div class="ti"><div class="tt">${esc(t.titulo)}</div>${t.desc?`<div class="td">${esc(t.desc)}</div>`:''}
+          <div class="tags">
+            ${f?`<span class="tag tfilha">${esc(f.nome)}</span>`:''}
+            ${done?'<span class="tag tfeito">✅ Feito</span>':late?'<span class="tag tlate">⚠ Atrasado</span>':'<span class="tag tpend">⏳ Pendente</span>'}
+            ${t.obrig?'<span class="tag tobrig">📸 Foto obrig.</span>':''}
+          </div>
+          ${t.horario?`<div class="ttime"><span class="dot${isToday(t)?' doth':''}"></span>${t.horario}${t.days?.length?' · '+fmtD(t.days):''}</div>`:''}
+        </div>
+      </div>
+      <div class="tact">
+        <button class="btn bo bsm" onclick="delTask('${t.id}')">🗑 Remover</button>
+        ${done?`<button class="btn bo bsm" onclick="reopenTask('${t.id}')">↩ Reabrir</button>`:''}
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function paiTab(tab){
+  el('tab-t').className='tab'+(tab==='t'?' on':'');el('tab-h').className='tab'+(tab==='h'?' on':'');
+  el('pai-t').style.display=tab==='t'?'':'none';el('pai-h').style.display=tab==='h'?'':'none';
+  if(tab==='h')renderHist();
+}
+
+function renderHist(){
+  const list=el('hist-list');
+  if(!history.length){list.innerHTML='<div class="empty"><div class="eico">📚</div><p>Nenhum registro ainda.</p></div>';return}
+  list.innerHTML=history.map(h=>{
+    const f=getFilha(h.filhaId);
+    return`<div class="hitem"><div class="hico">✅</div>
+      <div style="flex:1;min-width:0"><div style="font-weight:700;font-size:14px">${esc(h.titulo)}</div>
+      <div style="font-size:12px;color:var(--muted)">${f?esc(f.nome)+' · ':''} ${h.data}${h.hora?' às '+h.hora:''}</div></div>
+      ${h.foto?`<img src="${h.foto}" style="width:44px;height:44px;border-radius:8px;object-fit:cover;border:.5px solid var(--border);flex-shrink:0">`:''}
+    </div>`;
+  }).join('');
+}
+
+function renderFilha(id){
+  const f=getFilha(id);if(!f)return;
+  const ts=tasks.filter(t=>t.filhaId===id&&t.active!==false&&isToday(t));
+  const doneN=ts.filter(t=>isDone(t)).length;
+  const pct=ts.length?Math.round(doneN/ts.length*100):0;
+  el('fprog').innerHTML=`<div class="ph"><div class="av af" style="width:52px;height:52px;font-size:22px">${f.nome[0].toUpperCase()}</div>
+    <div><div style="font-weight:900;font-size:18px">${esc(f.nome)}</div>
+    <div style="font-size:13px;color:var(--muted)">${doneN} de ${ts.length} tarefas hoje · ${pct}%</div></div></div>
+    <div class="pbar"><div class="pfill" style="width:${pct}%"></div></div>`;
+  const list=el('filha-list');
+  if(!ts.length){list.innerHTML='<div class="empty"><div class="eico">🎉</div><p>Sem tarefas hoje!</p></div>';return}
+  list.innerHTML=ts.map(t=>{
+    const done=isDone(t),late=isLate(t)&&!done;
+    return`<div class="tcard${done?' done':''}${late?' late':''}">
+      <div class="th">${t.foto?`<img src="${t.foto}" class="timg">`:'<div class="tiph">📌</div>'}
+        <div class="ti"><div class="tt">${esc(t.titulo)}</div>${t.desc?`<div class="td">${esc(t.desc)}</div>`:''}
+          <div class="tags">${done?'<span class="tag tfeito">✅ Concluída</span>':late?'<span class="tag tlate">⚠ Atrasado</span>':'<span class="tag tpend">⏳ Pendente</span>'}
+          ${t.obrig?'<span class="tag tobrig">📸 Foto obrig.</span>':''}</div>
+          ${t.horario?`<div class="ttime"><span class="dot doth"></span>${t.horario}</div>`:''}
+        </div>
+      </div>
+      ${!done?`<button class="btn ba bw" style="margin-top:12px" onclick="verTask('${t.id}')">👀 Ver e concluir</button>`:''}
+    </div>`;
+  }).join('');
+}
+
+function verTask(id){
+  const t=tasks.find(x=>x.id===id);if(!t)return;
+  curTask=t;cfmFoto=null;
+  el('vt-tit').textContent=t.titulo;
+  const foto=el('vt-foto');if(t.foto){foto.src=t.foto;foto.style.display=''}else foto.style.display='none';
+  el('vt-desc').textContent=t.desc||'';el('vt-hora').textContent=t.horario?`⏰ ${t.horario}`:'';
+  el('cfm-prev').style.display='none';el('cfm-ph').style.display='';
+  el('btn-cfm').disabled=true;el('btn-cfm').style.opacity='.5';
+  el('vt-act').innerHTML=t.obrig?'':`<button class="btn ba bw" onclick="concluir()">✅ Marcar como feito</button>`;
+  el('vt-cfm').style.display=t.obrig?'':'none';
+  openM('m-ver');
+}
+
+function handleCfm(inp){
+  const f=inp.files[0];if(!f)return;
+  resize(f,d=>{cfmFoto=d;el('cfm-prev').src=d;el('cfm-prev').style.display='';el('cfm-ph').style.display='none';el('btn-cfm').disabled=false;el('btn-cfm').style.opacity='1'});
+}
+function concludePhoto(){if(curTask&&cfmFoto)doComplete(curTask.id,cfmFoto)}
+function concluir(){if(curTask)doComplete(curTask.id,null)}
+
+async function doComplete(id,foto){
+  const today=todayStr(),now=new Date(),hora=now.getHours()+':'+String(now.getMinutes()).padStart(2,'0');
+  const t=tasks.find(x=>x.id===id);
+  const comp={...(t?.completions||{}),[today]:{ts:Date.now(),foto}};
+  await db.collection('tasks').doc(id).update({completions:comp});
+  await db.collection('history').add({taskId:id,titulo:t?.titulo||'',filhaId:t?.filhaId||'',data:today,hora,foto:foto||null,ts:Date.now()});
+  closeM('m-ver');
+}
+
+async function delTask(id){if(!confirm('Remover esta tarefa?'))return;await db.collection('tasks').doc(id).delete()}
+async function reopenTask(id){
+  const t=tasks.find(x=>x.id===id);if(!t)return;
+  const comp={...(t.completions||{})};delete comp[todayStr()];
+  await db.collection('tasks').doc(id).update({completions:comp});
+}
+
+function openConfig(){
+  el('cfg-pai').value=cfg.nomePai||'';el('cfg-pin').value=cfg.pin||'';
+  renderCfgFilhas();openM('m-cfg');
+}
+function renderCfgFilhas(){
+  el('cfg-filhas').innerHTML=(cfg.filhas||[]).map((f,i)=>`
+    <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px">
+      <input value="${esc(f.nome)}" oninput="cfg.filhas[${i}].nome=this.value" style="margin:0;flex:1">
+      <button class="btn bd bsm" onclick="rmFilha('${f.id}')">✕</button>
+    </div>`).join('');
+}
+function addFilha(){const n=el('new-filha').value.trim();if(!n)return;if(!cfg.filhas)cfg.filhas=[];cfg.filhas.push({id:'f_'+Date.now(),nome:n});el('new-filha').value='';renderCfgFilhas()}
+function rmFilha(id){cfg.filhas=(cfg.filhas||[]).filter(f=>f.id!==id);renderCfgFilhas()}
+async function saveConfig(){
+  cfg.nomePai=el('cfg-pai').value.trim();
+  const pv=el('cfg-pin').value.trim();if(pv&&pv.length===4)cfg.pin=pv;
+  await db.collection('app').doc('config').set(cfg);
+  closeM('m-cfg');renderHome();
+}
+
+function openAddTask(){
+  taskFoto=null;el('up-prev').style.display='none';el('up-ph').style.display='';
+  el('tk-titulo').value='';el('tk-desc').value='';el('tk-hora').value='';
+  el('tk-obrig').checked=false;document.querySelectorAll('.rchip').forEach(c=>c.classList.remove('on'));
+  el('tk-filha').innerHTML=(cfg.filhas||[]).map(f=>`<option value="${f.id}">${esc(f.nome)}</option>`).join('');
+  openM('m-task');
+}
+function handleFoto(inp){const f=inp.files[0];if(!f)return;resize(f,d=>{taskFoto=d;el('up-prev').src=d;el('up-prev').style.display='';el('up-ph').style.display='none'})}
+async function saveTask(){
+  const titulo=el('tk-titulo').value.trim();if(!titulo){alert('Informe o título');return}
+  const filhaId=el('tk-filha').value;if(!filhaId){alert('Selecione uma filha');return}
+  const days=[...document.querySelectorAll('.rchip.on')].map(c=>parseInt(c.dataset.d));
+  await db.collection('tasks').add({filhaId,titulo,desc:el('tk-desc').value.trim(),horario:el('tk-hora').value,obrig:el('tk-obrig').checked,foto:taskFoto||null,days,completions:{},active:true,criadoEm:Date.now()});
+  closeM('m-task');
+}
+
+function getFilha(id){return(cfg.filhas||[]).find(f=>f.id===id)}
+function isDone(t){return!!(t.completions?.[todayStr()])}
+function isLate(t){if(!t.horario)return false;const[h,m]=t.horario.split(':').map(Number);const n=new Date();return n.getHours()>h||(n.getHours()===h&&n.getMinutes()>m+5)}
+function isToday(t){if(!t.days||!t.days.length)return true;return t.days.includes(new Date().getDay())}
+function todayStr(){return new Date().toISOString().slice(0,10)}
+function fmtD(days){return days.map(d=>['Dom','Seg','Ter','Qua','Qui','Sex','Sáb'][d]).join(', ')}
+function esc(s){if(!s)return'';const d=document.createElement('div');d.textContent=s;return d.innerHTML}
+function resize(file,cb){const img=new Image(),url=URL.createObjectURL(file);img.onload=()=>{const c=document.createElement('canvas');const mx=600;let w=img.width,h=img.height;if(w>mx){h=Math.round(h*mx/w);w=mx}if(h>mx){w=Math.round(w*mx/h);h=mx}c.width=w;c.height=h;c.getContext('2d').drawImage(img,0,0,w,h);cb(c.toDataURL('image/jpeg',.75));URL.revokeObjectURL(url)};img.src=url}
+function el(id){return document.getElementById(id)}
+function openM(id){el(id).classList.add('on')}
+function closeM(id){el(id).classList.remove('on')}
+document.querySelectorAll('.mover').forEach(m=>m.addEventListener('click',e=>{if(e.target===m)m.classList.remove('on')}));
+
+function schedAlarms(){
+  alarms.forEach(t=>clearTimeout(t));alarms=[];
+  const now=new Date();
+  tasks.filter(t=>t.horario&&t.active!==false&&!isDone(t)&&isToday(t)).forEach(t=>{
+    const[h,m]=t.horario.split(':').map(Number);
+    const alarm=new Date();alarm.setHours(h,m,0,0);
+    const diff=alarm-now;
+    if(diff>0&&diff<86400000)alarms.push(setTimeout(()=>fireAlarm(t),diff));
+  });
+}
+function fireAlarm(t){
+  const f=getFilha(t.filhaId);
+  el('ntxt').textContent=`${f?f.nome+': ':''}"${t.titulo}" — ${t.horario}`;
+  el('nbar').classList.add('on');
+  if('Notification' in window&&Notification.permission==='granted')
+    new Notification(`📌 ${t.titulo}`,{body:f?`Tarefa de ${f.nome}`:'TaskKids',icon:'icon-192.png'});
+}
+function closeNotif(){el('nbar').classList.remove('on')}
+if('Notification' in window&&Notification.permission==='default')Notification.requestPermission();
+
+(function boot(){const s=localStorage.getItem(LS_FB);if(!s){show('pg-setup');return}try{initFb(JSON.parse(s))}catch(e){show('pg-setup')}})();
+</script>
+</body>
+</html>
